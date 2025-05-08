@@ -326,7 +326,7 @@ transition: slide-left
 transition: slide-left
 ---
 
-# Exercise
+# Exercise JWT
 
 1. Try incorporating the signup, the login, and the GET orders screen using the front end of [foodtruck-app](https://github.com/avcoder/foodtruck-app)
 2. Fill in all 6 blanks in order to make this work
@@ -337,6 +337,14 @@ transition: slide-left
    - should get a Token which is stored in localStorage (see Application tab > Local Storage > http://localhost)
    - be redirected to GET / page 
    - view all the existing orders
+
+---
+transition: slide-left
+---
+
+# Exercise Passport
+
+1. Try incorporating the signup, the login using .ejs pages
 
 
 ---
