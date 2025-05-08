@@ -84,22 +84,28 @@ transition: slide-left
 # Passport (pg.1)
 
 - https://www.passportjs.org/packages/
-- `npm i passport passport-local passport-local-mongoose express-session`
-- need to configure session/passport before our routes
+- `npm i passport passport-local-mongoose express-session connect-mongo`
   ```js
-  app.use(session({
-    secret: process.env.PASSPORT_SECRET,
+  import passport from 'passport'; // in server.js
+  import session from 'express-session';
+  import MongoStore from 'connect-mongo';
+  import User from "./models/user.js";
+
+  // passport-local-mongoose provides .createStrategy() which uses passport-local under the hood
+  passport.use(User.createStrategy()); 
+  passport.serializeUser(User.serializeUser()); // upon successful login writes user ID to session
+  passport.deserializeUser(User.deserializeUser()); // called on every request that has a session which then reads user ID from session, and populates req.user
+  
+  app.use(session({  
+    secret: process.env.PASSPORT_SECRET, // remember to input this in .env
+    key: process.env.PASSPORT_COOKIE_KEY,  // remember to input this in .env
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.DB_CONN}) // store sessions in mongoDB (not in memory)
   }));
 
   app.use(passport.initialize()); 
   app.use(passport.session());
-  ```
-- in server.js: 
-  ```js
-  import passport from 'passport';
-  import session from 'express-session';
   ```
 
 ---
@@ -111,8 +117,7 @@ transition: slide-left
 - in `/src/models/user.js`:
   ```js
   import mongoose from "mongoose";
-
-  import plm from "passport-local-mongoose";
+  import plm from "passport-local-mongoose"; 
 
   const userSchema = mongoose.Schema({
     username: {
@@ -126,7 +131,9 @@ transition: slide-left
     },
   });
 
-  userSchema.plugin(plm);
+  // below adds username, hash and salt fields,
+  // and will store username, hashed password and salt value
+  userSchema.plugin(plm); 
 
   export default mongoose.model("user", userSchema);
   ```
@@ -135,9 +142,12 @@ transition: slide-left
 transition: slide-left
 ---
 
-# Passport
+# Passport (pg.3)
 
-- 
+- in `server.js`:
+  ```js
+
+  ```
 
 ---
 transition: slide-left
