@@ -72,8 +72,8 @@ transition: slide-left
 - Refactor all our `/api/order` routes to now be prepended with `/api/whatever` 
 - Insert 2 new routes related:
   ```js
-  app.post("/user", userController.createUser);
-  app.post("/login", userController.loginUser);
+  router.get("/user", userController.createUser);
+  router.get("/login", userController.loginUser);
   ```
 - `import userController from "./controllers/userController.js"`
 
