@@ -79,24 +79,65 @@ transition: slide-left
 
 ---
 transition: slide-left
+--- 
+
+# Passport (pg.1)
+
+- https://www.passportjs.org/packages/
+- `npm i passport passport-local passport-local-mongoose express-session`
+- need to configure session/passport before our routes
+  ```js
+  app.use(session({
+    secret: process.env.PASSPORT_SECRET,
+    resave: false,
+    saveUninitialized: false
+  }));
+
+  app.use(passport.initialize()); 
+  app.use(passport.session());
+  ```
+- in server.js: 
+  ```js
+  import passport from 'passport';
+  import session from 'express-session';
+  ```
+
+---
+transition: slide-left
 ---
 
-# JWT (pg.3)
-Continue modifying our protect function:
+# Passport (pg.2)
 
-1. In same auth.js file
+- in `/src/models/user.js`:
   ```js
-  export const protect = (req, res, next) => {
-    const bearer = req.headers.authorization;
+  import mongoose from "mongoose";
 
-    if (!bearer) {
-      res.status(401);
-      res.json({ message: 'not authorized' });
-      return;
-    }
-  }
+  import plm from "passport-local-mongoose";
+
+  const userSchema = mongoose.Schema({
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true, // hashed password
+    },
+  });
+
+  userSchema.plugin(plm);
+
+  export default mongoose.model("user", userSchema);
   ```
-1. Let's test what we have so far. Did you get back the `401` "not authorized" message?
+
+---
+transition: slide-left
+---
+
+# Passport
+
+- 
 
 ---
 transition: slide-left
