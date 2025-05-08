@@ -289,6 +289,7 @@ transition: slide-left
   };
   ```
 - Create new login.ejs and register.ejs pages
+- Test it
 
 ---
 transition: slide-left
