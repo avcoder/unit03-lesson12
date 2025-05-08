@@ -189,6 +189,22 @@ transition: slide-left
   - Try GETting `/api/order` -- Does it work?
   - Try GETting `/api/order` without the token?  Does it fail?
 
+---
+transition: slide-left
+---
+
+# Exercise JWT
+
+1. Try incorporating the signup, the login, and the GET orders screen using the front end of [foodtruck-app](https://github.com/avcoder/foodtruck-app)
+2. Fill in all 6 blanks in order to make this work
+3. If successful, you should be able to:
+   - sign in (which creates new user in db)
+   - be redirected to login page
+   - upon successful login
+   - should get a Token which is stored in localStorage (see Application tab > Local Storage > http://localhost)
+   - be redirected to GET / page 
+   - view all the existing orders
+
 
 
 
@@ -321,22 +337,6 @@ transition: slide-left
   ```
 - Test it
 
-
----
-transition: slide-left
----
-
-# Exercise JWT
-
-1. Try incorporating the signup, the login, and the GET orders screen using the front end of [foodtruck-app](https://github.com/avcoder/foodtruck-app)
-2. Fill in all 6 blanks in order to make this work
-3. If successful, you should be able to:
-   - sign in (which creates new user in db)
-   - be redirected to login page
-   - upon successful login
-   - should get a Token which is stored in localStorage (see Application tab > Local Storage > http://localhost)
-   - be redirected to GET / page 
-   - view all the existing orders
 
 ---
 transition: slide-left
