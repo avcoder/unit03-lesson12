@@ -273,6 +273,29 @@ transition: slide-left
 
 # Passport (pg.2)
 
+- Create new route to:
+  ```js
+  router.get("/register", userController.registerForm);
+  router.get("/login", userController.loginForm);
+  ```
+- Create new controller functions in `/src/controllers/userController.js`
+  ```js
+  const registerForm = async (req, res) => {
+    res.render("register", { title: "Register" });
+  };
+
+  const loginForm = async (req, res) => {
+    res.render("login", { title: "Login" });
+  };
+  ```
+- Create new login.ejs and register.ejs pages
+
+---
+transition: slide-left
+---
+
+# Passport (pg.3)
+
 - in `/src/models/user.js`:
   ```js
   import mongoose from "mongoose";
@@ -296,6 +319,7 @@ transition: slide-left
 
   export default mongoose.model("user", userSchema);
   ```
+
 
 
 ---
