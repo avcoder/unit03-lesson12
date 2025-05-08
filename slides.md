@@ -18,8 +18,8 @@ mdc: true
 
 # Authentication via Passport
 Back-End Development - part 12/12
-- [ ] Create login page using EJS
-- [ ] Create a sign up page using EJS
+- [ ] Continuing with JWT and EJS
+- [ ] Create login and register page
 - [ ] Passport
 
 <div class="abs-br m-6 text-xl">
@@ -75,6 +75,7 @@ transition: slide-left
   app.post("/user", userController.createUser);
   app.post("/login", userController.loginUser);
   ```
+- `import userController from "./controllers/userController.js"`
 
 ---
 transition: slide-left
