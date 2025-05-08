@@ -289,7 +289,6 @@ transition: slide-left
   };
   ```
 - Create new login.ejs and register.ejs pages
-- Test it
 
 ---
 transition: slide-left
@@ -320,7 +319,7 @@ transition: slide-left
 
   export default mongoose.model("user", userSchema);
   ```
-
+- Test it
 
 
 ---
