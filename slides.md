@@ -60,237 +60,6 @@ transition: slide-left
   <!DOCTYPE html><html><head><title><%= title %></title></head><body><h1>Welcome, <%= user %>!</h1></body></html>
   ```
 
----
-transition: slide-left
----
-
-# Refactor / Tidy
-
-- Move our get `/` route into our routes file as well
-- Change `app.use("/api", router)` to `app.use("/", router);`
-- Cut/paste our `app.get("/"...)` into our `router.js` file as `router.get("/"...)`
-- Refactor all our `/api/order` routes to now be prepended with `/api/whatever` 
-- Insert 2 new routes related:
-  ```js
-  router.get("/user", userController.createUser);
-  router.get("/login", userController.loginUser);
-  ```
-- `import userController from "./controllers/userController.js"`
-
----
-transition: slide-left
---- 
-
-# Passport (pg.1)
-
-- https://www.passportjs.org/packages/
-- `npm i passport passport-local-mongoose express-session connect-mongo`
-  ```js
-  import passport from 'passport'; // in server.js
-  import session from 'express-session';
-  import MongoStore from 'connect-mongo';
-  import User from "./models/user.js";
-
-  // passport-local-mongoose provides .createStrategy() which uses passport-local under the hood
-  passport.use(User.createStrategy()); 
-  passport.serializeUser(User.serializeUser()); // upon successful login writes user ID to session
-  passport.deserializeUser(User.deserializeUser()); // called on every request that has a session which then reads user ID from session, and populates req.user
-  
-  app.use(session({  
-    secret: process.env.PASSPORT_SECRET, // remember to input this in .env
-    key: process.env.PASSPORT_COOKIE_KEY,  // remember to input this in .env
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.DB_CONN}) // store sessions in mongoDB (not in memory)
-  }));
-
-  app.use(passport.initialize()); 
-  app.use(passport.session());
-  ```
-
----
-transition: slide-left
----
-
-# Passport (pg.2)
-
-- in `/src/models/user.js`:
-  ```js
-  import mongoose from "mongoose";
-  import plm from "passport-local-mongoose"; 
-
-  const userSchema = mongoose.Schema({
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true, // hashed password
-    },
-  });
-
-  // below adds username, hash and salt fields,
-  // and will store username, hashed password and salt value
-  userSchema.plugin(plm); 
-
-  export default mongoose.model("user", userSchema);
-  ```
-
----
-transition: slide-left
----
-
-# Passport (pg.3)
-
-- in `server.js`:
-  ```js
-
-  ```
-
----
-transition: slide-left
----
-
-# JWT (pg.4)
-Continue modifying our protect function:
-
-1. Q: why did it reject again?
-   - A: request was missing a Bearer token (which usually is contained in the Header)
-1. So let's play hacker and put in a fake bearer token in the request
-   - In Postman, underneath the url, click "Auth" tab > in dropdown choose "Bearer Token" > enter any string then test again
-   - Did we pass the protect guard function?
-1. Thus, we need to now check if the token is real and not fake.
-
----
-transition: slide-left
----
-
-# JWT (pg.5) 
-
-1. After `if (!bearer) { }` block of code
-  ```js
-  const [, token] = bearer.split(" ");
-
-  if (!token) {
-    res.status(401);
-    res.json({ message: 'not a valid token' });
-    return;
-  }
-
-  ```
-1. Test it in Postman; try passing a space character for Bearer token. Do you see "not a valid token"
-- 👮‍♀️ From a security point of view, is it wise to send these detailed error messages?
-- 👮‍♀️ If you were making a login form, what error messages should you display if username fails? if password fails?
-
----
-transition: slide-left
----
-
-# JWT (pg.6)
-
-1. After `if(!token) { }` block of code:
-
-  ```js
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload;
-    console.log(payload);
-    next();
-  } catch (e) {
-    // console.error(e);
-    res.status(401);
-    res.json({ message: "token malformed" });
-  }
-  ```
-1. Test it: pass any string as Bearer token. Do you see "malformed token"?
-
----
-transition: slide-left
----
-
-
-# JWT (pg. 7) 
-How does the client/browser get a token in the first place?
-
-- IF a user registers on our website, we give them a JSON web token -- that's like their identification card
-- Then if they wish to login, they have to show their identification card (JWT)
-
-BUT FIRST, we need to talk about how to store passwords:
-- 👮‍♀️ Do you think it's wise to store your user's passwords in plain text, in your database?
-
-
-
----
-layout: image
-transition: slide-left
-image: /assets/hashing.png
-backgroundSize: 500px 400px
----
-
-# JWT: Hashing (pg. 8)
-
----
-layout: image
-transition: slide-left
-image: /assets/hacker.png
-backgroundSize: 500px 400px
----
-
-# JWT: Hashing (pg. 9)
-
----
-transition: slide-left
----
-
-# JWT (pg.10)
-
-1. `npm i bcrypt`
-1. In same auth.js, Let's create functions that hash our passwords:
-  ```js
-  import bcrypt from "bcrypt";
-
-  export const hashPassword = (password) => {
-    const SALT = 10;
-    const hashedPassword = bcrypt.hash(password, SALT);
-    // console.log(hashedPassword); fyi - may need to async/await to see this
-    return hashedPassword;
-  };
-  ```
-1. Test it. in server.js
-   - `import { protect, hashPassword } from "./modules/auth.js";`
-   - then `hashPassword("kiwi")`
-
-
-
----
-transition: slide-left
----
-
-# JWT (pg. 11)
-
-1. In same auth.js, after our `hashPassword` function:
-  ```js
-  export const comparePasswords = (password, hash) => {
-    // is plain text password the same as hashed password in db?
-    const isMatch = bcrypt.compare(password, hash);
-    console.log(isMatch); // may need to async/await to see this
-    return isMatch;
-  };
-  ```
-1. Test it.
-   - Copy from terminal one of the hashed passwords
-   - In server.js, Paste hashed password below
-   ```js
-    const result = comparePasswords(
-      "kiwi",
-      "$2b$10$NDP9ipimMkH27hGpdoHbCumZGwTmpfVmuJz82sRwR.zg2zFktWoSS"
-    );
-    console.log("result: ", result);
-   ```
-1. Did 'kiwi' match to the hashed password?
-1. What happens if you just remove one character from hashed password?
 
 ---
 transition: slide-left
@@ -339,33 +108,6 @@ transition: slide-left
 1. Test via POSTMAN: did it create a new user entry in mongoDB with the password being hashed?
 1. Did the server return `201` and also a token? (click "Body" tab to the left of `201` to check) 
 1. Try registering again using existing username in database?  Gracefully [handle the error](https://unit03-lesson10.netlify.app/presenter/13).
-
----
-layout: image-right
-transition: slide-left
-image: /assets/bos.png
-backgroundSize: 500px 300px
-class: text-left
----
-
-# 10 minute break
-
-🍦 Cool Tips, Trends and Resources:
-- 🪗 [Array Grouping method](https://x.com/matanbobi/status/1693245513099776012)
-- 🎮 [React powered video games](https://x.com/cpojer/status/1704562739904135393)
-- 🏇 [Animation using GSAP](https://gsap.com/showcase/)
-- 📓 [Soft skill books](https://addyosmani.com/blog/soft-skills-books/?ref=syntax)
-
-<br>
-<hr>
-<br>
-
-- 🧪 [Enter anonymous lab questions](https://docs.google.com/forms/d/e/1FAIpQLSevvGARdHQikso-uLqFCO481MABKE5HofuSrlzEPMNQ2ZLykw/viewform?usp=dialog)
-- ℹ️ [Course feedback survey](https://circuitstream.typeform.com/to/ZoyYk7px#course_id=SoftwareAN&instructor=9514)
-
-<!-- 
-- take attendance
--->
 
 ---
 transition: slide-left
@@ -449,19 +191,111 @@ transition: slide-left
 
 
 
+
+---
+layout: image-right
+transition: slide-left
+image: /assets/bos.png
+backgroundSize: 500px 300px
+class: text-left
+---
+
+# 10 minute break
+
+🍦 Cool Tips, Trends and Resources:
+- 🪗 [Array Grouping method](https://x.com/matanbobi/status/1693245513099776012)
+- 🎮 [React powered video games](https://x.com/cpojer/status/1704562739904135393)
+- 🏇 [Animation using GSAP](https://gsap.com/showcase/)
+- 📓 [Soft skill books](https://addyosmani.com/blog/soft-skills-books/?ref=syntax)
+
+<br>
+<hr>
+<br>
+
+- 🧪 [Enter anonymous lab questions](https://docs.google.com/forms/d/e/1FAIpQLSevvGARdHQikso-uLqFCO481MABKE5HofuSrlzEPMNQ2ZLykw/viewform?usp=dialog)
+- ℹ️ [Course feedback survey](https://circuitstream.typeform.com/to/ZoyYk7px#course_id=SoftwareAN&instructor=9514)
+
+<!-- 
+- take attendance
+-->
+
 ---
 transition: slide-left
 ---
 
-# Exercise: 
-Refactor Login
+# Refactor / Tidy
 
-Scenario: Senior leadership has decided that as their app grows, they made a mistake and now want the `/user` and `/login` route inside the `/api` route
+- Move our get `/` route into our routes file as well
+- Change `app.use("/api", router)` to `app.use("/", router);`
+- Cut/paste our `app.get("/"...)` into our `router.js` file as `router.get("/"...)`
+- Refactor all our `/api/order` routes to now be prepended with `/api/whatever` 
+- Insert 2 new routes related:
+  ```js
+  router.get("/user", userController.createUser);
+  router.get("/login", userController.loginUser);
+  ```
+- `import userController from "./controllers/userController.js"`
 
-Refactor the necessary files:
-1. Ensure `/api/user` route and all related functionality works as before
-1. Ensure `/api/login` route and all functionality still works as before
+---
+transition: slide-left
+--- 
 
+# Passport (pg.1)
+
+- https://www.passportjs.org/packages/
+- `npm i passport passport-local-mongoose express-session connect-mongo`
+  ```js
+  import passport from 'passport'; // in server.js
+  import session from 'express-session';
+  import MongoStore from 'connect-mongo';
+  import User from "./models/user.js";
+
+  // passport-local-mongoose provides .createStrategy() which uses passport-local under the hood
+  passport.use(User.createStrategy()); 
+  passport.serializeUser(User.serializeUser()); // upon successful login writes user ID to session
+  passport.deserializeUser(User.deserializeUser()); // called on every request that has a session which then reads user ID from session, and populates req.user
+  
+  app.use(session({  
+    secret: process.env.PASSPORT_SECRET, // remember to input this in .env
+    key: process.env.PASSPORT_COOKIE_KEY,  // remember to input this in .env
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.DB_CONN}) // store sessions in mongoDB (not in memory)
+  }));
+
+  app.use(passport.initialize()); 
+  app.use(passport.session());
+  ```
+
+---
+transition: slide-left
+---
+
+# Passport (pg.2)
+
+- in `/src/models/user.js`:
+  ```js
+  import mongoose from "mongoose";
+  import plm from "passport-local-mongoose"; 
+
+  const userSchema = mongoose.Schema({
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true, // hashed password
+    },
+  });
+
+  // below adds username, hash and salt fields,
+  // and will store username, hashed password and salt value
+  userSchema.plugin(plm); 
+
+  export default mongoose.model("user", userSchema);
+  ```
 
 
 ---
