@@ -39,58 +39,42 @@ transition: slide-left
 
 - [My Github Repo](https://github.com/avcoder/unit03-backend) of backend up to this point
 - if Zoom crashes goto: https://meet.google.com/xzx-rria-pvs
-
----
-transition: slide-left
----
-
-# Create a login form using EJS
-
-1. `npm i jsonwebtoken`
-1. in `.env` create a new entry `JWT_SECRET=whatever` 
-1. create a new file `/src/modules/auth.js`:
+- Review: we installed EJS via `npm i ejs`
+- then in `server.js`:
   ```js
-  import jwt from 'jsonwebtoken'
+  import path from "path";
+  import { fileURLToPath } from "url";
 
-  export const createJWT = ({id, username}) => {
-    const token = jwt.sign({ id, username }, process.env.JWT_SECRET); 
-    return token; // token is a string
-  }
+  app.set("view engine", "ejs"); // place after app = express() statement
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  app.set("views", path.join(__dirname, "views")); 
+
+  app.get("/", (req, res) => {
+    // res.send("🚚 Welcome to the Food Truck!");
+    res.render("login", { title: "hello world", user: "Al" }); // passing object that login.ejs will use
+  });
   ```
-1. Let's test this so far and see what we get
-1. in index.js:
-  ```js
-  import { createJWT } from "./modules/auth.js";
-
-  console.log(createJWT({ id: "2", username: "al" }));
+- then created `/src/views/login.ejs`
+  ```html
+  <!DOCTYPE html><html><head><title><%= title %></title></head><body><h1>Welcome, <%= user %>!</h1></body></html>
   ```
 
 ---
 transition: slide-left
 ---
 
-# JWT (pg.2)
+# Refactor / Tidy
 
-1. Start creating a guard function that will protect our routes based on whether the request has the token
-1. In same auth.js file:
+- Move our get `/` route into our routes file as well
+- Change `app.use("/api", router)` to `app.use("/", router);`
+- Cut/paste our `app.get("/"...)` into our `router.js` file as `router.get("/"...)`
+- Refactor all our `/api/order` routes to now be prepended with `/api/whatever` 
+- Insert 2 new routes related:
   ```js
-  export const protect = (req, res, next) => {
-    // console.log(req.headers)
-    const bearer = req.headers.authorization; 
-
-    console.log("in protect, req.headers.authorization: ", bearer);
-    next();
-  };
+  app.post("/user", userController.createUser);
+  app.post("/login", userController.loginUser);
   ```
-1. import our protect function in `server.js` then change our existing `app.use('/api'...)`
-  ```js
-  import { protect } from './modules/auth.js'
-
-  // Now, a request won't even make it to router if it can't get past protect
-  app.use('/api', protect, router)
-  ```
-1. Let's test this in Postman by NOT sending any token to see if we get "not authorized"
-1. Ask chatGPT: `using javascript's fetch method, how do you pass an authorization token in the header?`
 
 ---
 transition: slide-left
