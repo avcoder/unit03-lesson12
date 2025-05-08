@@ -18,9 +18,9 @@ mdc: true
 
 # Authentication via Passport
 Back-End Development - part 12/12
+- [ ] Create login page using EJS
+- [ ] Create a sign up page using EJS
 - [ ] Passport
-- [ ] Create login page
-- [ ] Passport Strategies
 
 <div class="abs-br m-6 text-xl">
   <a href="https://github.com/slidevjs/slidev" target="_blank" class="slidev-icon-btn">
@@ -44,7 +44,7 @@ transition: slide-left
 transition: slide-left
 ---
 
-# JWT (pg.1)
+# Create a login form using EJS
 
 1. `npm i jsonwebtoken`
 1. in `.env` create a new entry `JWT_SECRET=whatever` 
